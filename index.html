@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <h1>Bookmarks Manager Application</h1>
+    <div class="container">
+      <form>
+        <h2>Add New Bookmark</h2>
+        <input type="text" class="title" placeholder="Website Text" />
+        <input type="url" class="url" placeholder="Website URL" />
+        <div class="category-suggestions">
+          <h4>Choose From Categories List Or Add A New One</h4>
+          <div></div>
+        </div>
+        <input type="text" class="category" placeholder="New Category Name" />
+        <button type="button" onclick="saveBookmark()">Add Bookmark</button>
+      </form>
+      <h2 class="all">Show All Bookmarks</h2>
+      <div class="category-buttons">
+        <h4>Filter Bookmarks By Added Categories</h4>
+        <div></div>
+      </div>
+      <div class="bookmarks"></div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
