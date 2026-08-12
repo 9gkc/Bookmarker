@@ -1,5 +1,7 @@
 # Bookmarks Manager Application ✨
 
+> **Live demo:** [Open Bookmarker in your browser](https://9gkc.github.io/Bookmarker/)
+
 <div align="center">
   <img src="https://img.shields.io/github/last-commit/9gkc/Bookmarker?style=for-the-badge&label=Last%20Update&color=58A6FF" alt="Last Update">
   <img src="https://img.shields.io/github/stars/9gkc/Bookmarker?style=for-the-badge&color=58A6FF" alt="GitHub Stars">
