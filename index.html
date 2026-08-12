@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project</title>
+    <title>Bookmarks Manager</title>
     <link rel="stylesheet" href="main.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,26 +12,32 @@
       rel="stylesheet" />
   </head>
   <body>
-    <h1>Bookmarks Manager Application</h1>
-    <div class="container">
-      <form>
-        <h2>Add New Bookmark</h2>
-        <input type="text" class="title" placeholder="Website Text" />
-        <input type="url" class="url" placeholder="Website URL" />
-        <div class="category-suggestions">
-          <h4>Choose From Categories List Or Add A New One</h4>
-          <div></div>
-        </div>
-        <input type="text" class="category" placeholder="New Category Name" />
-        <button type="button" onclick="saveBookmark()">Add Bookmark</button>
-      </form>
-      <h2 class="all">Show All Bookmarks</h2>
-      <div class="category-buttons">
-        <h4>Filter Bookmarks By Added Categories</h4>
-        <div></div>
+    <main>
+      <h1>Bookmarks Manager</h1>
+      <div class="container">
+        <form id="bookmark-form">
+          <h2>Add New Bookmark</h2>
+          <label for="bookmark-title">Website name</label>
+          <input id="bookmark-title" type="text" class="title" placeholder="Example: MDN Web Docs" maxlength="120" required />
+          <label for="bookmark-url">Website URL</label>
+          <input id="bookmark-url" type="url" class="url" placeholder="https://example.com" required />
+          <div class="category-suggestions">
+            <h3>Choose an existing category or add a new one</h3>
+            <div aria-label="Category suggestions"></div>
+          </div>
+          <label for="bookmark-category">Category</label>
+          <input id="bookmark-category" type="text" class="category" placeholder="Example: Learning" maxlength="60" required />
+          <button type="submit">Add bookmark</button>
+          <p id="bookmark-status" role="status" aria-live="polite">Your bookmarks are stored only in this browser.</p>
+        </form>
+        <button type="button" class="all">Show all bookmarks</button>
+        <section class="category-buttons" aria-labelledby="category-heading">
+          <h2 id="category-heading">Filter by category</h2>
+          <div aria-label="Bookmark categories"></div>
+        </section>
+        <section class="bookmarks" aria-label="Saved bookmarks"></section>
       </div>
-      <div class="bookmarks"></div>
-    </div>
+    </main>
     <script src="main.js"></script>
   </body>
 </html>

@@ -1,12 +1,11 @@
 * {
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 body {
   font-family: "Rubik", sans-serif;
-  font-optical-sizing: auto;
   background-color: #eee;
   margin: 0;
+  color: #1f2937;
 }
 h1 {
   padding: 20px;
@@ -14,153 +13,190 @@ h1 {
   background-color: white;
   text-align: center;
 }
-h2 {
+h2,
+h3 {
   text-align: center;
 }
 .container {
-  padding-right: 15px;
-  padding-left: 15px;
+  padding: 20px 15px;
   margin: auto;
   max-width: 900px;
 }
 form {
-  padding: 20px;
+  padding: 24px;
   background-color: white;
-  border-radius: 6px;
-  text-align: center;
+  border-radius: 8px;
 }
 form h2 {
-  margin: 0 0 15px;
+  margin: 0 0 20px;
+}
+form label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
 }
 form input {
   width: 100%;
-  padding: 15px;
-  margin: 10px 0;
+  padding: 13px;
+  margin: 8px 0;
   border: 1px solid #ddd;
   border-radius: 6px;
   background-color: #f6f6f6;
+  font: inherit;
 }
-form input:focus {
-  outline: none;
-  border: 1px solid #aaa;
+form input:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(244, 67, 54, 0.3);
+  outline-offset: 2px;
 }
 .category-suggestions {
-  padding: 20px;
-  background-color: #ddd;
+  padding: 16px;
+  background-color: #eee;
+  border-radius: 6px;
+  margin-top: 8px;
 }
-.category-suggestions h4 {
-  margin: 0;
+.category-suggestions h3,
+.category-buttons h2 {
+  margin: 0 0 12px;
   color: #444;
+  font-size: 1rem;
   font-weight: normal;
-  line-height: 1.8;
 }
-.category-suggestions div {
+.category-suggestions div,
+.category-buttons div {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
-.category-suggestions span {
-  color: #f44336;
-  font-weight: bold;
+.category-chip,
+.category-filter {
+  border: 1px solid #ccc;
+  padding: 7px 12px;
+  border-radius: 999px;
   cursor: pointer;
+  transition: 0.2s;
+  font: inherit;
 }
-form button {
+.category-chip {
+  color: #c62828;
+  background: white;
+}
+.category-chip:hover,
+.category-filter:hover,
+.category-filter.active {
+  background-color: #f44336;
+  border-color: #f44336;
+  color: white;
+}
+form > button,
+.all {
   width: 100%;
-  padding: 15px;
-  margin: 10px 0;
+  padding: 14px;
+  margin: 14px 0 0;
   border: none;
   border-radius: 6px;
   background-color: #f44336;
   color: white;
   font-size: 18px;
   cursor: pointer;
+  font-weight: 600;
 }
-h2.all {
-  cursor: pointer;
-  transition: 0.3s;
+form > button:hover,
+.all:hover {
+  background-color: #c62828;
 }
-h2.all:hover {
-  color: #f44336;
+#bookmark-status {
+  min-height: 1.4em;
+  margin-bottom: 0;
+  text-align: center;
+  color: #666;
+}
+#bookmark-status[data-tone="error"] {
+  color: #b42318;
+}
+#bookmark-status[data-tone="success"] {
+  color: #166534;
 }
 .category-buttons {
   background-color: #ddd;
   padding: 20px;
   margin: 20px auto;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: center;
 }
-.category-buttons h4 {
-  margin: 0;
-  color: #444;
-  font-weight: normal;
-  line-height: 1.8;
-}
-.category-buttons div {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.category-buttons div span {
-  padding: 2px 10px;
-  background-color: #eee;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.category-buttons div span:hover,
-.category-buttons div span.active {
-  background-color: #f44336;
-  color: white;
-}
-.bookmarks > div {
+.bookmarks > .bookmark-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin: 10px 0;
   background-color: white;
-  padding: 20px;
+  padding: 18px;
+  border-radius: 6px;
 }
-.bookmarks div .number {
+.bookmark-item .number {
   background-color: #ddd;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 0 0 40px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
 }
-.bookmarks div .cat {
+.bookmark-item .cat {
   width: 120px;
   background-color: #eee;
   padding: 10px;
   text-align: center;
   border-radius: 6px;
-  margin-right: 15px;
 }
-.bookmarks div .link {
+.bookmark-item .link {
   flex: 1;
+  min-width: 0;
 }
-.bookmarks div .link a {
+.bookmark-item .link a {
   text-decoration: none;
   color: black;
-  transition: 0.3s;
+  transition: 0.2s;
   font-weight: bold;
+  overflow-wrap: anywhere;
 }
-.bookmarks div .link a:hover {
+.bookmark-item .link a:hover {
   color: #f44336;
 }
-.bookmarks div button {
+.bookmark-item button {
   padding: 10px;
   border: none;
   border-radius: 6px;
   background-color: #f44336;
   color: white;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
   font-weight: bold;
+}
+.bookmark-item button:hover {
+  background-color: #c62828;
+}
+.empty-state {
+  padding: 28px;
+  background: white;
+  border-radius: 6px;
+  text-align: center;
+  color: #666;
+}
+@media (max-width: 650px) {
+  .bookmark-item {
+    flex-wrap: wrap;
+  }
+  .bookmark-item .link {
+    order: 4;
+    flex-basis: 100%;
+  }
+  .bookmark-item .cat {
+    margin-left: auto;
+  }
 }

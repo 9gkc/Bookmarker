@@ -2,150 +2,237 @@ const bookmarksContainer = document.querySelector(".bookmarks");
 const categorySuggestionsContainer = document.querySelector(".category-suggestions div");
 const categoryButtonsContainer = document.querySelector(".category-buttons div");
 const categoryInput = document.querySelector(".category");
-const showAll = document.querySelector(".all");
+const bookmarkForm = document.querySelector("#bookmark-form");
+const showAllButton = document.querySelector(".all");
+const bookmarkStatus = document.querySelector("#bookmark-status");
+const storageKey = "bookmarks";
+const activeCategoryKey = "active-category";
+let activeCategory = readActiveCategory();
 
-localStorage.removeItem("active-category");
+function setStatus(message, tone = "info") {
+  if (!bookmarkStatus) return;
+  bookmarkStatus.textContent = message;
+  bookmarkStatus.dataset.tone = tone;
+}
 
-showAll.addEventListener("click", function () {
-  displayBookmarks();
-  // Method One
-  const categoryButtons = document.querySelectorAll(".category-buttons div span");
-  categoryButtons.forEach((button) => button.classList.remove("active"));
-  localStorage.removeItem("active-category");
-  // Method Two
-  // location.reload();
-});
-
-function saveBookmark() {
-  const title = document.querySelector(".title").value.trim();
-  const url = document.querySelector(".url").value.trim();
-  const category = document.querySelector(".category").value.trim(); // Education
-
-  // Validation
-  if (!title || !url || !category) {
-    alert("Please Fill in all Fields");
-    return;
+function readActiveCategory() {
+  try {
+    return localStorage.getItem(activeCategoryKey) || "";
+  } catch (error) {
+    console.error("Unable to read active category", error);
+    return "";
   }
+}
 
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  // { Education: [{ title, url }, { title, url }, { title, url }] }
-  if (!allBookmarks[category]) allBookmarks[category] = [];
-  allBookmarks[category].push({ title, url });
-  localStorage.setItem("bookmarks", JSON.stringify(allBookmarks));
-  // console.log(allBookmarks);
+function isSafeUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol);
+  } catch {
+    return false;
+  }
+}
 
-  // Empty The Form
-  document.querySelectorAll("input").forEach((input) => (input.value = ""));
+function readBookmarks() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed)
+        .filter(([category, entries]) => (
+          typeof category === "string" && category.trim() && Array.isArray(entries)
+        ))
+        .map(([category, entries]) => [
+          category.trim().slice(0, 60),
+          entries.filter((bookmark) => (
+            bookmark &&
+            typeof bookmark.title === "string" && bookmark.title.trim() &&
+            typeof bookmark.url === "string" && isSafeUrl(bookmark.url)
+          )).map((bookmark) => ({
+            title: bookmark.title.trim().slice(0, 120),
+            url: bookmark.url.trim(),
+          })),
+        ])
+        .filter(([, entries]) => entries.length > 0),
+    );
+  } catch (error) {
+    console.error("Unable to read bookmarks", error);
+    setStatus("Saved bookmarks could not be read from this browser.", "error");
+    return {};
+  }
+}
 
-  // Update Bookmarks List
+function saveBookmarks(bookmarks) {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(bookmarks));
+    return true;
+  } catch (error) {
+    console.error("Unable to save bookmarks", error);
+    setStatus("The bookmark could not be saved in this browser.", "error");
+    return false;
+  }
+}
+
+function setActiveCategory(category) {
+  activeCategory = category;
+  try {
+    if (category) localStorage.setItem(activeCategoryKey, category);
+    else localStorage.removeItem(activeCategoryKey);
+  } catch (error) {
+    console.error("Unable to save active category", error);
+  }
   displayBookmarks();
-
-  // Update Category Suggestions
-  displayCategorySuggestions();
-
-  // Update Category Buttons
   displayCategoryButtons();
 }
 
+function createBookmarkElement(category, bookmark, index, number) {
+  const item = document.createElement("article");
+  item.className = "bookmark-item";
+  const numberElement = document.createElement("span");
+  numberElement.className = "number";
+  numberElement.textContent = String(number);
+  const categoryElement = document.createElement("span");
+  categoryElement.className = "cat";
+  categoryElement.textContent = category;
+  const linkContainer = document.createElement("div");
+  linkContainer.className = "link";
+  const link = document.createElement("a");
+  link.href = bookmark.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = bookmark.title;
+  linkContainer.appendChild(link);
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.dataset.category = category;
+  deleteButton.dataset.index = String(index);
+  deleteButton.textContent = "Delete";
+  deleteButton.setAttribute("aria-label", `Delete ${bookmark.title}`);
+  item.append(numberElement, categoryElement, linkContainer, deleteButton);
+  return item;
+}
+
 function displayBookmarks() {
-  bookmarksContainer.innerHTML = ""; // Empty The Container
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  for (const category in allBookmarks) {
-    // console.log(category);
-    const categoryBookmarks = allBookmarks[category];
-    // console.log(categoryBookmarks);
-    categoryBookmarks.forEach((bookmark, index) => {
-      // console.log(bookmark);
-      const bookmarkElement = document.createElement("div");
-      bookmarkElement.innerHTML = `
-        <div class="cat">${category}</div>
-        <div class="link"><a href="${bookmark.url}" target="_blank">${bookmark.title}</a></div>
-        <button onclick="deleteBookmark('${category}', ${index})">Delete</button>
-      `;
-      bookmarksContainer.appendChild(bookmarkElement);
+  if (!bookmarksContainer) return;
+  const allBookmarks = readBookmarks();
+  if (activeCategory && !allBookmarks[activeCategory]) activeCategory = "";
+  bookmarksContainer.replaceChildren();
+  const categories = activeCategory ? [activeCategory] : Object.keys(allBookmarks);
+  let renderedCount = 0;
+
+  categories.forEach((category) => {
+    (allBookmarks[category] || []).forEach((bookmark, index) => {
+      renderedCount += 1;
+      bookmarksContainer.appendChild(createBookmarkElement(category, bookmark, index, renderedCount));
     });
+  });
+
+  if (renderedCount === 0) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "empty-state";
+    emptyState.textContent = "No bookmarks saved yet. Add your first bookmark above.";
+    bookmarksContainer.appendChild(emptyState);
   }
 }
 
-function filterBookmarksByCategory(category) {
-  // cat = "Education"
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  const categoryBookmarks = allBookmarks[category]; // Get "Education" Key From The Object
-  bookmarksContainer.innerHTML = ""; // Empty The Container
-  categoryBookmarks.forEach((bookmark, index) => {
-    const bookmarkElement = document.createElement("div");
-    bookmarkElement.innerHTML = `
-      <span class="number">${index + 1}</span>
-      <div class="link"><a href="${bookmark.url}" target="_blank">${bookmark.title}</a></div>
-      <button onclick="deleteBookmark('${category}', ${index})">Delete</button>
-    `;
-    bookmarksContainer.appendChild(bookmarkElement);
-  });
-}
-
 function displayCategorySuggestions() {
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  const categories = Object.keys(allBookmarks);
-  // console.log(categories);
-  categorySuggestionsContainer.innerHTML = ""; // Empty The Container
-
+  if (!categorySuggestionsContainer) return;
+  const categories = Object.keys(readBookmarks()).sort((a, b) => a.localeCompare(b));
+  categorySuggestionsContainer.replaceChildren();
+  if (categories.length === 0) {
+    categorySuggestionsContainer.appendChild(document.createTextNode("No categories yet"));
+    return;
+  }
   categories.forEach((category) => {
-    const categoryElement = document.createElement("span");
-    categoryElement.textContent = category;
-    // categoryElement.onclick = () => (document.querySelector(".category").value = category);
-    categoryElement.addEventListener("click", () => (categoryInput.value = category));
-    categorySuggestionsContainer.appendChild(categoryElement);
+    const categoryButton = document.createElement("button");
+    categoryButton.type = "button";
+    categoryButton.className = "category-chip";
+    categoryButton.textContent = category;
+    categoryButton.addEventListener("click", () => {
+      categoryInput.value = category;
+      categoryInput.focus();
+    });
+    categorySuggestionsContainer.appendChild(categoryButton);
   });
 }
 
 function displayCategoryButtons() {
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  const categories = Object.keys(allBookmarks);
-  categoryButtonsContainer.innerHTML = ""; // Empty The Container
-
+  if (!categoryButtonsContainer) return;
+  const categories = Object.keys(readBookmarks()).sort((a, b) => a.localeCompare(b));
+  categoryButtonsContainer.replaceChildren();
   categories.forEach((category) => {
-    const categoryElement = document.createElement("span");
-    categoryElement.textContent = category;
-    categoryElement.addEventListener("click", function () {
-      filterBookmarksByCategory(category);
-      localStorage.setItem("active-category", category);
-      // Remove Active Class From All Buttons
-      const categoryButtons = document.querySelectorAll(".category-buttons div span");
-      categoryButtons.forEach((button) => button.classList.remove("active"));
-      // Add Active Class To The Clicked Button
-      this.classList.add("active");
-    });
-
-    const activeCategory = localStorage.getItem("active-category");
-    if (activeCategory === category) categoryElement.classList.add("active");
-
-    categoryButtonsContainer.appendChild(categoryElement);
+    const categoryButton = document.createElement("button");
+    categoryButton.type = "button";
+    categoryButton.className = "category-filter";
+    categoryButton.textContent = category;
+    const isActive = activeCategory === category;
+    categoryButton.classList.toggle("active", isActive);
+    categoryButton.setAttribute("aria-pressed", String(isActive));
+    categoryButton.addEventListener("click", () => setActiveCategory(category));
+    categoryButtonsContainer.appendChild(categoryButton);
   });
 }
 
-function deleteBookmark(category, index) {
-  const allBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || {};
-  allBookmarks[category].splice(index, 1);
+function saveBookmark(event) {
+  event?.preventDefault();
+  const titleInput = document.querySelector(".title");
+  const urlInput = document.querySelector(".url");
+  const title = titleInput.value.trim();
+  const url = urlInput.value.trim();
+  const category = categoryInput.value.trim().slice(0, 60);
 
-  // If The Category is Empty, Remove The Category
-  if (allBookmarks[category].length === 0) delete allBookmarks[category];
-  localStorage.setItem("bookmarks", JSON.stringify(allBookmarks));
-
-  if (allBookmarks[category] && localStorage.getItem("active-category")) {
-    filterBookmarksByCategory(category);
-  } else {
-    displayBookmarks();
+  if (!title || !url || !category) {
+    setStatus("Please complete the title, URL, and category fields.", "error");
+    return;
+  }
+  if (title.length > 120) {
+    setStatus("The title must be 120 characters or fewer.", "error");
+    return;
+  }
+  if (!isSafeUrl(url)) {
+    setStatus("Enter a valid HTTP or HTTPS URL.", "error");
+    return;
   }
 
+  const allBookmarks = readBookmarks();
+  if (!allBookmarks[category]) allBookmarks[category] = [];
+  const alreadySaved = allBookmarks[category].some((bookmark) => bookmark.url === url);
+  if (alreadySaved) {
+    setStatus("This bookmark is already saved in that category.", "error");
+    return;
+  }
+  allBookmarks[category].push({ title, url });
+  if (!saveBookmarks(allBookmarks)) return;
+  titleInput.value = "";
+  urlInput.value = "";
+  categoryInput.value = "";
+  setActiveCategory("");
   displayCategorySuggestions();
   displayCategoryButtons();
+  setStatus("Bookmark added successfully.", "success");
 }
 
-// Show Bookmarks
+function deleteBookmark(category, index) {
+  const allBookmarks = readBookmarks();
+  if (!allBookmarks[category] || !allBookmarks[category][index]) return;
+  const [removed] = allBookmarks[category].splice(index, 1);
+  if (allBookmarks[category].length === 0) delete allBookmarks[category];
+  if (!saveBookmarks(allBookmarks)) return;
+  if (activeCategory && !allBookmarks[activeCategory]) activeCategory = "";
+  displayBookmarks();
+  displayCategorySuggestions();
+  displayCategoryButtons();
+  setStatus(`${removed.title} deleted.`, "success");
+}
+
+bookmarkForm?.addEventListener("submit", saveBookmark);
+showAllButton?.addEventListener("click", () => setActiveCategory(""));
+bookmarksContainer?.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-category][data-index]");
+  if (!button) return;
+  deleteBookmark(button.dataset.category, Number(button.dataset.index));
+});
+
 displayBookmarks();
-
-// Show Category Suggestions
 displayCategorySuggestions();
-
-// Show Category Buttons
 displayCategoryButtons();

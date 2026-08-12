@@ -23,18 +23,20 @@ This is a simple yet effective **Bookmarks Manager Application** built with vani
 *   **Category Suggestions**: Automatically suggests existing categories to streamline the adding process.
 *   **Filter by Category**: View bookmarks based on their assigned categories.
 *   **Delete Bookmarks**: Remove unwanted bookmarks with a single click.
-*   **Local Storage**: All data is saved securely in your browser's local storage, ensuring persistence across sessions.
+*   **URL Validation**: Only valid HTTP and HTTPS links are accepted.
+*   **Safe Rendering**: Bookmark titles and categories are rendered through DOM APIs, not HTML interpolation.
+*   **Local Storage**: All data is saved in your browser's local storage, ensuring persistence across sessions.
 *   **Responsive Design**: A clean and intuitive user interface that works well on various screen sizes.
 
 ## How to Run Locally 💻
 
 Follow these simple steps to get the Bookmarks Manager Application up and running on your local machine:
 
-1.  **Clone the Repository** (Once it's on GitHub):
+1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
-    cd bookmarks-manager-application
+    git clone https://github.com/9gkc/Bookmarker.git
+    cd Bookmarker
     ```
-2.  **Open `index.html`**: Simply open the `index.html` file in your preferred web browser. No server setup or build process is required!
+2.  **Open `index.html`**: Open the file in a modern browser. No server setup or build process is required.
 
 Enjoy managing your bookmarks! 🎉
