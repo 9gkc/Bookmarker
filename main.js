@@ -183,6 +183,30 @@ function displayCategoryButtons() {
   });
 }
 
+function exportBookmarks() {
+  const data = readBookmarks();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  link.href = url;
+  link.download = `bookmarks-backup-${stamp}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  setStatus("Bookmarks exported as a local JSON file.", "success");
+}
+
+function ensureExportControl() {
+  if (!showAllButton || document.querySelector("#export-bookmarks")) return;
+  const exportButton = document.createElement("button");
+  exportButton.type = "button";
+  exportButton.id = "export-bookmarks";
+  exportButton.className = "all";
+  exportButton.textContent = "Export JSON backup";
+  exportButton.addEventListener("click", exportBookmarks);
+  showAllButton.insertAdjacentElement("afterend", exportButton);
+}
+
 function saveBookmark(event) {
   event?.preventDefault();
   const titleInput = document.querySelector(".title");
@@ -244,6 +268,7 @@ bookmarksContainer?.addEventListener("click", (event) => {
   deleteBookmark(button.dataset.category, Number(button.dataset.index));
 });
 
+ensureExportControl();
 displayBookmarks();
 displayCategorySuggestions();
 displayCategoryButtons();
