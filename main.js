@@ -33,6 +33,16 @@ function isSafeUrl(value) {
   }
 }
 
+function normalizeUrl(value) {
+  try {
+    const url = new URL(value.trim());
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return value.trim();
+  }
+}
+
 function readBookmarks() {
   try {
     const parsed = JSON.parse(localStorage.getItem(storageKey) || "{}");
@@ -50,7 +60,7 @@ function readBookmarks() {
             typeof bookmark.url === "string" && isSafeUrl(bookmark.url)
           )).map((bookmark) => ({
             title: bookmark.title.trim().slice(0, 120),
-            url: bookmark.url.trim(),
+            url: normalizeUrl(bookmark.url),
           })),
         ])
         .filter(([, entries]) => entries.length > 0),
@@ -178,10 +188,10 @@ function saveBookmark(event) {
   const titleInput = document.querySelector(".title");
   const urlInput = document.querySelector(".url");
   const title = titleInput.value.trim();
-  const url = urlInput.value.trim();
+  const rawUrl = urlInput.value.trim();
   const category = categoryInput.value.trim().slice(0, 60);
 
-  if (!title || !url || !category) {
+  if (!title || !rawUrl || !category) {
     setStatus("Please complete the title, URL, and category fields.", "error");
     return;
   }
@@ -189,11 +199,12 @@ function saveBookmark(event) {
     setStatus("The title must be 120 characters or fewer.", "error");
     return;
   }
-  if (!isSafeUrl(url)) {
+  if (!isSafeUrl(rawUrl)) {
     setStatus("Enter a valid HTTP or HTTPS URL.", "error");
     return;
   }
 
+  const url = normalizeUrl(rawUrl);
   const allBookmarks = readBookmarks();
   if (!allBookmarks[category]) allBookmarks[category] = [];
   const alreadySaved = allBookmarks[category].some((bookmark) => bookmark.url === url);
